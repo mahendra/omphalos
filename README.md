@@ -78,6 +78,9 @@ $ python ldaemon.py /path/to/access.log
 ## Possible improvements
 * Move to python watchdog for better platform independent stuff
 * Use cement for providing better command line option handling
+* Support for configuration files
+** Defining the data chain/pipe
+** Configurations for each plugin
 * Implement using proper transport plugins for ZeroMQ, UDP based etc.
 * A setup.py for installation
 * init scripts for daemonizing monitors and collectors

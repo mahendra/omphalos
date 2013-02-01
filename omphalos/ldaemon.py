@@ -21,7 +21,7 @@ parser = CLFParser(sys.argv[1])
 
 # Start the console display
 conf = {
-    'refresh_time' : 10,
+    'refresh_time': 10,
     'top_count': 12,
     'alerts': {
         # Alert when the overall traffic (for the last x minutes) crosses this
@@ -30,10 +30,11 @@ conf = {
         # Alert when the overall hits (for the last x minutes) crosses this
         'total_hits': 1000,
 
-        # Alert when the traffic for a URI segment crosses this in the last x minutes
+        # Alert when the traffic for a segment crosses this in the
+        # last x minutes
         'size': 512,
 
-        # Alert when the hits for a URI segment crosses this in the last x minutes
+        # Alert when the hits for a segment crosses this in the last x minutes
         'hits': 5,
     },
 }

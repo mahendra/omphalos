@@ -74,11 +74,12 @@ $ python ldaemon.py /path/to/access.log
 * The sample daemon uses threads. Need to think of better approaches
 * The console for displaying must be the standard 23*80. If the window becomes smaller the app will die
 * If the monitoring thread dies, the app will just keep waiting for data till user hits 'q'. Need to implement a better mechanism for thread monitoring (avoid threads if possible)
+* The output colour scheme is desined for black console backgrounds (with coloured text). Need to test these values on other background colours
 
 ## Possible improvements
 * Move to python watchdog for better platform independent stuff
 * Use cement for providing better command line option handling
-* Support for configuration files
+* Support for configuration files (using cement)
  * Defining the data chain/pipe
  * Configurations for each plugin
 * Implement using proper transport plugins for ZeroMQ, UDP based etc.

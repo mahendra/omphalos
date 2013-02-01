@@ -162,7 +162,7 @@ class Console(Output):
                     uri_str = fmt % (uri, hits, size)
                     stdscr.addstr(ypos, 0, uri_str, curses.color_pair(attr))
                     ypos += 1
-                
+
             elif display == ord('b'):
                 # Display the top uris by bytes transferred
                 fields = self.collector.get_top('size', self.top_count)

@@ -64,3 +64,27 @@ A sample daemon is provided which can be used for showcasing how the interfaces 
 $ python ldaemon.py /path/to/access.log
 ```
 
+## Dependencies
+* pyinotify
+* curses - for console display output plugin
+* pyes - for ElasticSearch collector plugin
+
+## Known gotchas
+* Not heavily tested. The usage of inotify for some cases has not been tested
+* The sample daemon uses threads. Need to think of better approaches
+* The console for displaying must be the standard 23*80. If the window becomes smaller the app will die
+* If the monitoring thread dies, the app will just keep waiting for data till user hits 'q'. Need to implement a better mechanism for thread monitoring (avoid threads if possible)
+
+## Possible improvements
+* Move to python watchdog for better platform independent stuff
+* Use cement for providing better command line option handling
+* Implement using proper transport plugins for ZeroMQ, UDP based etc.
+* A setup.py for installation
+* init scripts for daemonizing monitors and collectors
+* Single monitor process for multiple files
+* Support for monitoring directories
+
+## Tests to be done
+* Check for log file truncation
+* Check for unmount of underlying file system
+* Test for w3c formatted log files

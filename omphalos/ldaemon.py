@@ -9,9 +9,9 @@ from output.console import Console
 from parser.clf import CLFParser
 from transport.dummy import Dummy
 
-# Start the sliding collector with 10 minutes of storage
+# Start the sliding collector with 2 minutes of storage
 conf = {}
-collector = Slider(conf, 60)
+collector = Slider(conf, 120)
 
 # Start a dummy transport
 transport = Dummy(collector=collector)
@@ -22,11 +22,18 @@ parser = CLFParser(sys.argv[1])
 # Start the console display
 conf = {
     'refresh_time' : 10,
-    'top_count': 15,
+    'top_count': 12,
     'alerts': {
-        'total_size': 1024,
-        'total_hits': 10,
+        # Alert when the overall traffic (for the last x minutes) crosses this
+        'total_size': 1024 * 1024,
+
+        # Alert when the overall hits (for the last x minutes) crosses this
+        'total_hits': 1000,
+
+        # Alert when the traffic for a URI segment crosses this in the last x minutes
         'size': 512,
+
+        # Alert when the hits for a URI segment crosses this in the last x minutes
         'hits': 5,
     },
 }
@@ -39,7 +46,9 @@ conf = {
 }
 
 monitor = MonitorINotify(conf, transport, parser)
-#monitor = Poll(conf, transport, parser)
+
+# Switch to this for use on Linux, Windows or Mac (to be tested)
+# monitor = Poll(conf, transport, parser)
 
 # Start two threads. One for monitoring and one for displaying
 # on the console

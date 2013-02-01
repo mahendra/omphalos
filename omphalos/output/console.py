@@ -186,7 +186,7 @@ class Console(Output):
 
                 stdscr.addstr(4, 0, title.ljust(79), curses.A_REVERSE)
 
-                ypos = 0
+                ypos = 5
                 for ref, hits in fields:
                     ref_str = fmt % (ref, hits)
                     stdscr.addstr(ypos, 0, ref_str)
@@ -199,7 +199,7 @@ class Console(Output):
 
                 stdscr.addstr(4, 0, title.ljust(79), curses.A_REVERSE)
 
-                ypos = 0
+                ypos = 5
                 for user, hits in fields:
                     user_str = fmt % (user, hits)
                     stdscr.addstr(ypos, 0, user_str)

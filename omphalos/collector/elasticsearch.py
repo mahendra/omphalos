@@ -43,3 +43,8 @@ class ElasticSearch(Collector):
         # Run a query to ES for the summary and return the data
         # accordingly
         pass
+
+    def get_uri_data(self, uri, dtype):
+        # Run a query to ES for the summary and return the data
+        # accordingly
+        pass

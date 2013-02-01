@@ -55,3 +55,18 @@ class Collector(object):
         @rtype: C{list}
         '''
         raise NotImplemented('Not implemented in plugin')
+
+    def get_uri_data(self, uri, dtype):
+        '''
+        Get the specified data for the uri
+
+        @param uri: The URI for which data is requested
+        @type uri: C{str}
+
+        @param dtype: Must be 'hits', 'size'
+        @type dtype: C{str}
+
+        @return: The requested count
+        @rtype: C{int}
+        '''
+        raise NotImplemented('Not implemented in plugin')

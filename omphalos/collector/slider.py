@@ -27,9 +27,9 @@ class Slider(Aggregate):
         # The overall aggregation info is maintained separately
         super(Slider, self).__init__(conf, timeout)
 
-        # This is a dirty little hack to cleanup the old data if no
-        # new data is being added. In a truly distributed mode, this
-        # can be done via other timeout mechanisms
+        # This lock may be redundant because deque() is supposed to be
+        # thread-safe. Just keeping it for sanity. Need to analyse deque
+        # in detail before changing
         self.lock = threading.Lock()
 
     def _cleanup(self):

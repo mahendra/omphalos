@@ -13,6 +13,9 @@ class Dummy(Transport):
 
         @param conf: A configuration dictionary to be used by the plugin
         @type conf: C{dict}
+
+        @param collector: A collector instance for sending data to
+        @type collector: L{Collector}
         '''
         self.collector = collector
 

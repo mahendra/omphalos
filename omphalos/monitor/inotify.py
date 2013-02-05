@@ -62,6 +62,7 @@ class MonitorINotify(Monitor):
         self.parser = parser
         self.paths = list(paths)
         self.handles = {}
+        self.watches = {}
 
         if not self.paths:
             raise ValueError('At least one input file must be provided')
@@ -103,11 +104,11 @@ class MonitorINotify(Monitor):
             self.handles[path] = handle
         except IOError:
             self.exit()
-            self.monitor.notifier.stop()
             return
 
         self.process(path)
-        self.manager.add_watch(path, INOTIFY_MASK, rec=False)
+        watch = self.manager.add_watch(path, INOTIFY_MASK, rec=False)
+        self.watches.update(watch)
 
     def process(self, path):
         # There is data to be read
@@ -115,7 +116,12 @@ class MonitorINotify(Monitor):
         line = handle.readline()
 
         if not line:
-            file_size = os.fstat(handle.fileno()).st_size
+            try:
+                file_size = os.stat(path).st_size
+            except OSError:
+                # File has been deleted
+                self.exit()
+                return
 
             if file_size < handle.tell():
                 # Looks the file has been truncated
@@ -126,6 +132,13 @@ class MonitorINotify(Monitor):
             if data:
                 self.transport.send(data)
             line = handle.readline()
+
+    def exit(self):
+        '''Indicate that the monitor must exit'''
+        if self.watches:
+            self.manager.rm_watch(self.watches.values())
+
+        super(MonitorINotify, self).exit()
 
     def _check_exit(self, notifier):
         return self.check_exit()

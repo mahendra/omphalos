@@ -14,8 +14,9 @@ class Aggregate(Collector):
     '''An in memory aggregating collector implementation'''
     def __init__(self, conf, timeout):
         self.data = defaultdict(Counter)
-        self.started_at = datetime.now()
-        self.updated_at = datetime.now() + timedelta(seconds=1)
+        self.started_at = datetime.now() - timedelta(seconds=1)
+        self.created_at = self.started_at
+        self.updated_at = datetime.now()
         self.total = Counter({'hits': 0, 'size': 0})
 
     def add_data(self, data):
@@ -82,8 +83,7 @@ class Aggregate(Collector):
         @return: The summary of the data
         @rtype: L{Summary}
         '''
-
-        interval = self.updated_at - self.started_at
+        interval = datetime.now() - self.started_at
         return Summary(interval=interval, **self.total)
 
     def get_top(self, dtype, count):
@@ -115,3 +115,11 @@ class Aggregate(Collector):
         @rtype: C{int}
         '''
         return self.data[dtype][uri]
+
+    def reset_interval(self, start_at):
+        '''
+        Reset the interval by adjusting the start time
+        '''
+
+        if start_at > self.created_at:
+            self.started_at = start_at

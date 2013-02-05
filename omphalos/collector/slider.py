@@ -43,11 +43,13 @@ class Slider(Aggregate):
         with self.lock:
             while self.timeseries:
                 old = self.timeseries[0]
-                if old.timestamp >= ref_time:
+                if old.timestamp > ref_time:
                     break
 
                 old = self.timeseries.popleft()
                 super(Slider, self).remove_data(old)
+
+            self.reset_interval(ref_time)
 
     def add_data(self, data):
         '''

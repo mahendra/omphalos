@@ -1,5 +1,5 @@
 '''
-Plugin to parse logs in CLF format
+Plugin to parse logs in W3C log format
 '''
 
 import re

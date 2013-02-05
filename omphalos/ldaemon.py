@@ -42,11 +42,12 @@ conf = {
 display = Console(conf, collector)
 
 # Start the monitor
-conf = {
-    'file_path': sys.argv[1]
-}
-
-monitor = MonitorINotify(conf, transport, parser)
+try:
+    conf = {}
+    monitor = MonitorINotify(conf, transport, parser, sys.argv[1])
+except Exception as exp:
+    print str(exp)
+    sys.exit(-1)
 
 # Switch to this for use on Linux, Windows or Mac (to be tested)
 # monitor = Poll(conf, transport, parser)

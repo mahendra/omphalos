@@ -109,7 +109,8 @@ class Console(Output):
 
             sequence = []
             messages = []
-            for key, msg in [('hits', 'hits'), ('size', 'bytes transferred')]:
+            for key, msg in [('hits', 'total hits'),
+                             ('size', 'total bytes transferred')]:
                 value = getattr(summary, key)
                 sequence.append((key, value))
                 messages.append(msg)
@@ -249,7 +250,7 @@ class Console(Output):
             if key in self.alerts:
                 alert_value = self.alerts[key]
 
-                if value >= alert_value:
+                if alert_value and value >= alert_value:
                     alerted[alert] = 1
                     attr = ALERT_PRINT
                 else:

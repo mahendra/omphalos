@@ -10,70 +10,38 @@ from monitor.base import Monitor
 
 INOTIFY_MASK = pyinotify.IN_MODIFY | pyinotify.IN_DELETE_SELF
 
+# When a file is opened, read some data from the end of the file to
+# ensure that we have not lost any data
+READ_BACK = 1024
+
 
 class FileMonitor(pyinotify.ProcessEvent):
     '''An event handler for monitoring log files'''
 
-    def my_init(self, manager=None, transport=None, parser=None, path=None,
-                monitor=None):
-        '''Init function called by the constructor'''
-        self.manager = manager
-        self.transport = transport
-        self.parser = parser
-        self.path = path
+    def my_init(self, monitor=None):
+        '''
+        Init function called by the constructor
+
+        @param monitor: The monitor plugin to be used
+        @type paths: L{Monitor}
+        '''
         self.monitor = monitor
-        self.fd = None
-        self._register(path)
-
-    def _register(self, path):
-        '''Register for monitoring this file path'''
-        try:
-            if self.fd:
-                self.fd.close()
-
-            self.fd = open(path)
-
-            # Read through the last 1kb of the file
-            file_size = os.stat(path).st_size
-            if file_size > 1024:
-                self.fd.seek(-1024, 2)
-        except OSError:
-            self.monitor.notifier.stop()
-            return
-
-        self._process(path)
-        self.manager.add_watch(path, INOTIFY_MASK, rec=False)
-
-    def _process(self, path):
-        # There is data to be read
-        line = self.fd.readline()
-
-        if not line:
-            file_size = os.stat(path).st_size
-
-            if file_size < self.fd.tell():
-                # Looks the file has been truncated
-                self.fd.seek(0)
-
-        while line:
-            data = self.parser.parse_line(line.strip())
-            if data:
-                self.transport.send(data)
-            line = self.fd.readline()
 
     def process_IN_DELETE_SELF(self, event):
         '''Invoked if the file is deleted'''
+
+        # TODO: The behaviour seems to have an issue. Not triggered always
         time.sleep(2)
-        self._register(event.pathname)
+        self.monitor.register(event.pathname)
 
     def process_IN_MODIFY(self, event):
         '''Invoked if the file is modified'''
-        self._process(event.pathname)
+        self.monitor.process(event.pathname)
 
 
 class MonitorINotify(Monitor):
     '''The base class for implementing a monitoring plugin'''
-    def __init__(self, conf, transport, parser):
+    def __init__(self, conf, transport, parser, *paths):
         '''
         Initialize the monitoring plugin
 
@@ -85,11 +53,79 @@ class MonitorINotify(Monitor):
 
         @param parser: A parser instance used by the plugin
         @type conf: L{Parser}
+
+        @param paths: A list of paths to monitor
+        @type paths: C{tuple}
         '''
 
-        self.file_path = conf['file_path']
         self.transport = transport
         self.parser = parser
+        self.paths = list(paths)
+        self.handles = {}
+
+        if not self.paths:
+            raise ValueError('At least one input file must be provided')
+
+        # Initialize the monitors
+        self.manager = pyinotify.WatchManager()
+        self.monitor = FileMonitor(monitor=self)
+        self.notifier = pyinotify.Notifier(self.manager, self.monitor)
+
+        for path in self.paths:
+            if not os.path.exists(path):
+                raise ValueError('File does not exist: %s' % path)
+            if not os.path.isfile(path):
+                raise ValueError('Input is not a file: %s' % path)
+
+            self.handles[path] = None
+            self.register(path)
+
+    def register(self, path):
+        '''
+        Register a file path for monitoring. Also, read the first few
+        lines of data to ensure that we don't lose out on any data
+        '''
+        try:
+            handle = self.handles[path]
+
+            # Close the file handler first
+            if handle:
+                handle.close()
+                self.handles[path] = None
+
+            # Read through the last 1kb of the file
+            handle = open(path, 'r')
+
+            file_size = os.fstat(handle.fileno()).st_size
+            if file_size > READ_BACK:
+                handle.seek(-READ_BACK, 2)
+
+            self.handles[path] = handle
+        except IOError:
+            self.exit()
+            self.monitor.notifier.stop()
+            return
+
+        self.process(path)
+        self.manager.add_watch(path, INOTIFY_MASK, rec=False)
+
+    def process(self, path):
+        # There is data to be read
+        handle = self.handles[path]
+        line = handle.readline()
+
+        if not line:
+            file_size = os.fstat(handle.fileno()).st_size
+
+            if file_size < handle.tell():
+                # Looks the file has been truncated
+                handle.seek(0)
+
+        while line:
+            data = self.parser.parse_line(line.strip())
+            if data:
+                self.transport.send(data)
+            line = handle.readline()
 
     def _check_exit(self, notifier):
         return self.check_exit()
@@ -98,9 +134,4 @@ class MonitorINotify(Monitor):
         '''
         Monitor the data source
         '''
-        manager = pyinotify.WatchManager()
-        fmonitor = FileMonitor(manager=manager, parser=self.parser,
-                               path=self.file_path, transport=self.transport,
-                               monitor=self)
-        self.notifier = pyinotify.Notifier(manager, fmonitor)
         self.notifier.loop(self._check_exit)

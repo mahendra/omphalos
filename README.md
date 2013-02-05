@@ -75,6 +75,7 @@ $ python ldaemon.py /path/to/access.log
 * The console for displaying must be the standard 23*80. If the window becomes smaller the app will die
 * If the monitoring thread dies, the app will just keep waiting for data till user hits 'q'. Need to implement a better mechanism for thread monitoring (avoid threads if possible)
 * The output colour scheme is desined for black console backgrounds (with coloured text). Need to test these values on other background colours
+* The console output plugin can potentially block when it is requesting the collector for summary (say ElasticSearch etc.). This needs to be handled
 
 ## Possible improvements
 * Move to python watchdog for better platform independent stuff

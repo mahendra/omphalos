@@ -61,13 +61,15 @@ The library can be used by chaining different plugins together
 A sample daemon is provided which can be used for showcasing how the interfaces can be used
 
 ```
-$ python ldaemon.py /path/to/access.log
+$ httptop.py /path/to/access.log
+$ httptop.py --help
 ```
 
 ## Dependencies
-* pyinotify
-* curses - for console display output plugin
-* pyes - for ElasticSearch collector plugin
+* ``pyinotify``
+* ``curses`` - for console display output plugin
+* ``pyes`` - for ElasticSearch collector plugin
+* ``cement`` - for the ``httptop`` command
 
 ## Known gotchas
 * Not heavily tested. The usage of inotify for some cases has not been tested
